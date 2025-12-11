@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Torihiki Note - グッズ交換・譲渡管理ツール</title>
-    <link rel="icon" type="image/png" href="/icon.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icon.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -18,57 +16,26 @@
     <style>
         /* 基本設定 */
         * { font-family: 'M PLUS Rounded 1c', sans-serif; }
-        body { 
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); 
-            min-height: 100vh; 
-            padding: 2rem; 
-            color: #fff; 
-        }
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 2rem; color: #fff; }
 
         /* ガラスモーフィズム */
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 20px; 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
 
         /* ネオンカラー */
         .neon-pink { color: #ff2e63; text-shadow: 0 0 10px #ff2e63; }
         .neon-cyan { color: #08d9d6; text-shadow: 0 0 10px #08d9d6; }
         
-        .btn-neon-pink { 
-            background: linear-gradient(135deg, #ff2e63 0%, #ff1744 100%); 
-            box-shadow: 0 0 20px rgba(255, 46, 99, 0.5); 
-            transition: all 0.3s ease; 
-        }
-        .btn-neon-cyan { 
-            background: linear-gradient(135deg, #08d9d6 0%, #00bcd4 100%); 
-            box-shadow: 0 0 20px rgba(8, 217, 214, 0.5); 
-            transition: all 0.3s ease; 
-        }
+        .btn-neon-pink { background: linear-gradient(135deg, #ff2e63 0%, #ff1744 100%); box-shadow: 0 0 20px rgba(255, 46, 99, 0.5); transition: all 0.3s ease; }
+        .btn-neon-cyan { background: linear-gradient(135deg, #08d9d6 0%, #00bcd4 100%); box-shadow: 0 0 20px rgba(8, 217, 214, 0.5); transition: all 0.3s ease; }
+        
+        /* 楽天ボタン（収益化用） */
+        .btn-rakuten { background: linear-gradient(135deg, #bf0000 0%, #ff0000 100%); box-shadow: 0 0 15px rgba(191, 0, 0, 0.4); transition: all 0.3s ease; color: white; font-weight: bold; }
+        .btn-rakuten:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(255, 0, 0, 0.6); }
 
-        /* 入力フォームの文字色対策（強力版） */
-        input, select, textarea { 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            color: #fff !important; 
-            border-radius: 12px; 
-            padding: 0.75rem; 
-            transition: all 0.3s ease; 
-        }
-        /* オートフィル（自動入力）対策 */
-        input:-webkit-autofill, 
-        textarea:-webkit-autofill, 
-        select:-webkit-autofill { 
-            -webkit-box-shadow: 0 0 0px 1000px #1a1a2e inset !important; 
-            -webkit-text-fill-color: #fff !important; 
-            color: #fff !important; 
-            caret-color: #fff; 
-        }
+        /* 入力フォーム対策 */
+        input, select, textarea { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff !important; border-radius: 12px; padding: 0.75rem; transition: all 0.3s ease; }
+        input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -webkit-box-shadow: 0 0 0px 1000px #1a1a2e inset !important; -webkit-text-fill-color: #fff !important; color: #fff !important; caret-color: #fff; }
 
-        /* ステータスバッジ */
         .status-badge { cursor: pointer; transition: all 0.3s ease; border-radius: 12px; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 700; }
         .status-badge:hover { transform: scale(1.05); }
         .status-dm { background: rgba(255, 46, 99, 0.2); color: #ff2e63; }
@@ -78,7 +45,6 @@
         .status-received { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
         .status-completed { background: rgba(156, 39, 176, 0.2); color: #9c27b0; }
         
-        /* アニメーション */
         .trade-card { transition: all 0.3s ease; animation: slideIn 0.5s ease; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -88,7 +54,6 @@
         .glitch::after { left: -2px; text-shadow: -2px 0 #08d9d6; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 1s infinite linear alternate-reverse; }
         @keyframes glitch-anim { 0% { clip: rect(42px, 9999px, 44px, 0); } 5% { clip: rect(12px, 9999px, 59px, 0); } 50% { clip: rect(57px, 9999px, 98px, 0); } 100% { clip: rect(78px, 9999px, 54px, 0); } }
 
-        /* ファイルアップロード */
         .file-upload { position: relative; display: inline-block; width: 100%; }
         .file-upload input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
         .file-upload-label { display: flex; align-items: center; justify-content: center; padding: 0.75rem; border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; color: rgba(255,255,255,0.6); transition: all 0.3s; }
@@ -98,33 +63,10 @@
         .icon-btn { transition: all 0.3s ease; border-radius: 10px; padding: 0.5rem; }
         .icon-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.1); }
 
-        /* 募集画像カード（写真対応版） */
-        .recruit-card { 
-            width: 800px; 
-            padding: 0; 
-            background: #1a1a2e; 
-            border-radius: 28px; 
-            overflow: hidden; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.5); 
-            position: relative; 
-            display: flex; 
-        }
-        .recruit-card-image { 
-            width: 350px; 
-            height: 450px; 
-            object-fit: cover; 
-            background: #0f172a; 
-            border-right: 2px solid rgba(8, 217, 214, 0.3); 
-        }
-        .recruit-card-content { 
-            flex: 1; 
-            padding: 32px; 
-            position: relative; 
-            background: linear-gradient(145deg, rgba(26, 26, 46, 0.98), rgba(15, 52, 96, 0.98)); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-        }
+        /* 募集画像カード */
+        .recruit-card { width: 800px; padding: 0; background: #1a1a2e; border-radius: 28px; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.5); position: relative; display: flex; }
+        .recruit-card-image { width: 350px; height: 450px; object-fit: cover; background: #0f172a; border-right: 2px solid rgba(8, 217, 214, 0.3); }
+        .recruit-card-content { flex: 1; padding: 32px; position: relative; background: linear-gradient(145deg, rgba(26, 26, 46, 0.98), rgba(15, 52, 96, 0.98)); display: flex; flex-direction: column; justify-content: center; }
         .recruit-card .pill { background: linear-gradient(135deg, #08d9d6 0%, #00bcd4 100%); color: #0f172a; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; }
         .recruit-card .label { color: #08d9d6; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
         .recruit-card .value { font-size: 1.25rem; font-weight: bold; line-height: 1.4; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
@@ -148,39 +90,17 @@
             <h2 class="text-2xl font-bold neon-cyan mb-4"><i class="fas fa-plus-circle mr-2"></i>新しい取引を追加</h2>
             <form id="trade-form" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-300 mb-2">相手の名前</label>
-                        <input type="text" id="partner-name" placeholder="例: 田中さん" required class="w-full">
-                    </div>
-                    <div>
-                        <label class="block text-gray-300 mb-2">取引アイテム名</label>
-                        <input type="text" id="item-name" placeholder="例: 限定缶バッジ" required class="w-full">
-                    </div>
+                    <div><label class="block text-gray-300 mb-2">相手の名前</label><input type="text" id="partner-name" placeholder="例: 田中さん" required class="w-full"></div>
+                    <div><label class="block text-gray-300 mb-2">取引アイテム名</label><input type="text" id="item-name" placeholder="例: 限定缶バッジ" required class="w-full"></div>
                 </div>
-                <div>
-                    <label class="block text-gray-300 mb-2">取引の種類</label>
-                    <select id="trade-type" required class="w-full">
-                        <option value="">選択してください</option>
-                        <option value="譲渡">譲渡</option>
-                        <option value="交換">交換</option>
-                    </select>
+                <div><label class="block text-gray-300 mb-2">取引の種類</label>
+                    <select id="trade-type" required class="w-full"><option value="">選択してください</option><option value="譲渡">譲渡</option><option value="交換">交換</option></select>
                 </div>
-                <div>
-                    <label class="block text-gray-300 mb-2">商品写真 (任意)</label>
-                    <div class="file-upload">
-                        <input type="file" id="item-image" accept="image/*">
-                        <div class="file-upload-label" id="file-label">
-                            <i class="fas fa-camera mr-2"></i>写真を撮る / 選択する
-                        </div>
-                    </div>
+                <div><label class="block text-gray-300 mb-2">商品写真 (任意)</label>
+                    <div class="file-upload"><input type="file" id="item-image" accept="image/*"><div class="file-upload-label" id="file-label"><i class="fas fa-camera mr-2"></i>写真を撮る / 選択する</div></div>
                 </div>
-                <div>
-                    <label class="block text-gray-300 mb-2">メモ</label>
-                    <textarea id="memo" rows="3" placeholder="条件など..." class="w-full"></textarea>
-                </div>
-                <button type="submit" class="btn-neon-pink text-white font-bold py-3 px-6 rounded-xl w-full">
-                    <i class="fas fa-magic mr-2"></i>追加する
-                </button>
+                <div><label class="block text-gray-300 mb-2">メモ</label><textarea id="memo" rows="3" placeholder="条件など..." class="w-full"></textarea></div>
+                <button type="submit" class="btn-neon-pink text-white font-bold py-3 px-6 rounded-xl w-full"><i class="fas fa-magic mr-2"></i>追加する</button>
             </form>
         </div>
         
@@ -195,97 +115,91 @@
         </div>
     </div>
     
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-card p-6 max-w-md w-full mx-4 overflow-y-auto max-h-[90vh]">
+            <h2 class="text-2xl font-bold neon-cyan mb-4">取引を編集</h2>
+            <form id="edit-form" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div><label class="text-sm text-gray-400">相手の名前</label><input type="text" id="edit-partner-name" required class="w-full"></div>
+                <div><label class="text-sm text-gray-400">アイテム名</label><input type="text" id="edit-item-name" required class="w-full"></div>
+                <div><label class="text-sm text-gray-400">種類</label><select id="edit-trade-type" required class="w-full"><option value="譲渡">譲渡</option><option value="交換">交換</option></select></div>
+                <div class="p-3 rounded-lg border border-gray-600 bg-gray-800 bg-opacity-50 space-y-3">
+                    <p class="text-xs text-cyan-400 font-bold"><i class="fas fa-truck mr-1"></i>配送情報</p>
+                    <div><label class="text-xs text-gray-400">配送方法</label><select id="edit-delivery-method" class="w-full text-sm"><option value="">未設定</option><option value="普通郵便">普通郵便</option><option value="クリックポスト">クリックポスト</option><option value="レターパック">レターパック</option><option value="メルカリ便">メルカリ便</option><option value="宅配便">宅配便</option><option value="その他">その他</option></select></div>
+                    <div><label class="text-xs text-gray-400">追跡番号</label><input type="text" id="edit-tracking-number" class="w-full text-sm" placeholder="1234-5678-9012"></div>
+                    <div><label class="text-xs text-gray-400">発送日</label><input type="date" id="edit-shipping-date" class="w-full text-sm"></div>
+                </div>
+                <div><label class="text-sm text-gray-400">メモ</label><textarea id="edit-memo" rows="3" class="w-full"></textarea></div>
+                <div class="flex gap-4">
+                    <button type="submit" class="btn-neon-cyan text-white font-bold py-2 px-6 rounded-xl flex-1">保存</button>
+                    <button type="button" id="cancel-edit" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-xl flex-1">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="packing-modal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-card p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold neon-pink"><i class="fas fa-box-open mr-2"></i>おすすめ梱包ガイド</h2>
+                <button id="close-packing-modal" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="packing-content" class="space-y-4"></div>
+        </div>
+    </div>
+
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="glass-card p-6 max-w-3xl w-full mx-4 space-y-4">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold neon-cyan"><i class="fas fa-camera mr-2"></i>募集カード生成</h2>
-                <button id="close-image-modal" class="icon-btn text-white"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="bg-gray-900 rounded-xl p-2 border border-gray-700 overflow-hidden">
-                <img id="image-preview" alt="プレビュー" class="w-full rounded-lg">
-            </div>
-            <button id="download-image" class="btn-neon-cyan text-white font-bold py-3 px-6 rounded-xl w-full">
-                <i class="fas fa-download mr-2"></i>画像を保存
-            </button>
+            <div class="flex items-center justify-between"><h2 class="text-2xl font-bold neon-cyan"><i class="fas fa-camera mr-2"></i>募集カード生成</h2><button id="close-image-modal" class="icon-btn text-white"><i class="fas fa-times text-xl"></i></button></div>
+            <div class="bg-gray-900 rounded-xl p-2 border border-gray-700 overflow-hidden"><img id="image-preview" alt="プレビュー" class="w-full rounded-lg"></div>
+            <button id="download-image" class="btn-neon-cyan text-white font-bold py-3 px-6 rounded-xl w-full"><i class="fas fa-download mr-2"></i>画像を保存</button>
         </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // ステータス定義
-            const STATUSES = [
-                { id: 'dm', label: 'DM中', class: 'status-dm' },
-                { id: 'address', label: '住所交換', class: 'status-address' },
-                { id: 'shipping-wait', label: '発送待', class: 'status-shipping-wait' },
-                { id: 'shipped', label: '発送済', class: 'status-shipped' },
-                { id: 'received', label: '受取済', class: 'status-received' },
-                { id: 'completed', label: '完了', class: 'status-completed' }
-            ];
+            // アフィリエイトリンク定数
+            const RAKUTEN_OPP_LINK = "https://hb.afl.rakuten.co.jp/ichiba/4f1b9f47.abfd9f1e.4f1b9f48.10369a78/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ffukuro-oukoku%2F1000-00001-0101%2F&link_type=hybrid_url&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJoeWJyaWRfdXJsIiwic2l6ZSI6IjQwMHg0MDAiLCJuYW0iOjEsIm5hbXAiOiJyaWdodCIsImNvbSI6MSwiY29tcCI6ImRvd24iLCJwcmljZSI6MSwiYm9yIjoxLCJjb2wiOjEsImJidG4iOjEsInByb2QiOjAsImFtcCI6ZmFsc2V9";
+            const RAKUTEN_PUTI_LINK = "https://hb.afl.rakuten.co.jp/ichiba/4f1ba575.f3406c87.4f1ba577.07ac995d/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fputi2%2Fppf-cd100%2F&link_type=hybrid_url&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJoeWJyaWRfdXJsIiwic2l6ZSI6IjQwMHg0MDAiLCJuYW0iOjEsIm5hbXAiOiJyaWdodCIsImNvbSI6MSwiY29tcCI6ImRvd24iLCJwcmljZSI6MSwiYm9yIjoxLCJjb2wiOjEsImJidG4iOjEsInByb2QiOjAsImFtcCI6ZmFsc2V9";
 
-            // データ読み込み
+            const STATUSES = [{id:'dm',label:'DM中',class:'status-dm'},{id:'address',label:'住所交換',class:'status-address'},{id:'shipping-wait',label:'発送待',class:'status-shipping-wait'},{id:'shipped',label:'発送済',class:'status-shipped'},{id:'received',label:'受取済',class:'status-received'},{id:'completed',label:'完了',class:'status-completed'}];
+
             let trades = [];
-            try {
-                trades = JSON.parse(localStorage.getItem('trades') || '[]');
-            } catch (e) {
-                console.error("データ読み込みエラー", e);
-                trades = [];
-            }
-            
+            try { trades = JSON.parse(localStorage.getItem('trades') || '[]'); } catch (e) { trades = []; }
             let currentTab = 'active';
 
-            // 初期化
             init();
 
-            function init() {
-                loadTrades();
-                setupEventListeners();
-                console.log("App Initialized");
-            }
+            function init() { loadTrades(); setupEventListeners(); }
 
             function setupEventListeners() {
-                // 取引追加フォーム
                 const form = document.getElementById('trade-form');
-                if (form) {
-                    form.addEventListener('submit', handleAddTrade);
-                }
-
-                // ファイル選択時の表示変更
-                const fileInput = document.getElementById('item-image');
-                if (fileInput) {
-                    fileInput.addEventListener('change', (e) => {
-                        const fileName = e.target.files[0]?.name;
-                        const label = document.getElementById('file-label');
-                        if (label) {
-                            label.innerHTML = fileName 
-                                ? `<i class="fas fa-check mr-2"></i>${escapeHtml(fileName)}` 
-                                : '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
-                        }
-                    });
-                }
-
-                // タブ切り替え
+                if (form) form.addEventListener('submit', handleAddTrade);
+                document.getElementById('item-image').addEventListener('change', (e) => {
+                    const fileName = e.target.files[0]?.name;
+                    document.getElementById('file-label').innerHTML = fileName ? `<i class="fas fa-check mr-2"></i>${escapeHtml(fileName)}` : '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
+                });
                 document.getElementById('tab-active').addEventListener('click', () => switchTab('active'));
                 document.getElementById('tab-completed').addEventListener('click', () => switchTab('completed'));
-
-                // 画像モーダル
-                document.getElementById('close-image-modal').addEventListener('click', closeImageModal);
-                document.getElementById('image-modal').addEventListener('click', (e) => {
-                    if (e.target.id === 'image-modal') closeImageModal();
+                
+                // モーダル関連
+                document.getElementById('edit-form').addEventListener('submit', handleEditTrade);
+                document.getElementById('cancel-edit').addEventListener('click', () => toggleModal('edit-modal', false));
+                document.getElementById('close-image-modal').addEventListener('click', () => toggleModal('image-modal', false));
+                document.getElementById('close-packing-modal').addEventListener('click', () => toggleModal('packing-modal', false));
+                
+                // モーダル外クリックで閉じる
+                ['edit-modal', 'image-modal', 'packing-modal'].forEach(id => {
+                    document.getElementById(id).addEventListener('click', (e) => { if (e.target.id === id) toggleModal(id, false); });
                 });
             }
 
-            // 取引追加処理
             async function handleAddTrade(e) {
-                e.preventDefault(); // リロード防止
-                
+                e.preventDefault();
                 try {
                     const fileInput = document.getElementById('item-image');
                     let imageData = null;
-                    
-                    // 画像があれば圧縮
-                    if (fileInput.files && fileInput.files[0]) {
-                        imageData = await compressImage(fileInput.files[0]);
-                    }
+                    if (fileInput.files && fileInput.files[0]) imageData = await compressImage(fileInput.files[0]);
 
                     const trade = {
                         id: Date.now().toString(),
@@ -293,26 +207,35 @@
                         itemName: document.getElementById('item-name').value,
                         tradeType: document.getElementById('trade-type').value,
                         memo: document.getElementById('memo').value,
+                        deliveryMethod: '', trackingNumber: '', shippingDate: '', 
                         status: 'dm',
                         image: imageData,
                         createdAt: new Date().toISOString()
                     };
-
                     trades.push(trade);
-                    saveTrades();
-                    loadTrades();
-                    
-                    // フォームリセット
-                    e.target.reset();
+                    saveTrades(); loadTrades(); e.target.reset();
                     document.getElementById('file-label').innerHTML = '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
+                } catch (error) { alert("追加エラー"); }
+            }
+
+            // 編集保存処理
+            function handleEditTrade(e) {
+                e.preventDefault();
+                const id = document.getElementById('edit-id').value;
+                const trade = trades.find(t => t.id === id);
+                if (trade) {
+                    trade.partnerName = document.getElementById('edit-partner-name').value;
+                    trade.itemName = document.getElementById('edit-item-name').value;
+                    trade.tradeType = document.getElementById('edit-trade-type').value;
+                    trade.memo = document.getElementById('edit-memo').value;
+                    trade.deliveryMethod = document.getElementById('edit-delivery-method').value;
+                    trade.trackingNumber = document.getElementById('edit-tracking-number').value;
+                    trade.shippingDate = document.getElementById('edit-shipping-date').value;
                     
-                } catch (error) {
-                    console.error("追加エラー:", error);
-                    alert("追加に失敗しました。");
+                    saveTrades(); loadTrades(); toggleModal('edit-modal', false);
                 }
             }
 
-            // 画像圧縮関数
             function compressImage(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -320,259 +243,190 @@
                         const img = new Image();
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            const MAX_SIZE = 800; // 最大サイズ制限
-
-                            if (width > height) {
-                                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                            } else {
-                                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
+                            let width = img.width, height = img.height;
+                            const MAX_SIZE = 800;
+                            if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                            else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                            canvas.width = width; canvas.height = height;
+                            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                             resolve(canvas.toDataURL('image/jpeg', 0.7));
                         };
-                        img.onerror = reject;
                         img.src = e.target.result;
                     };
-                    reader.onerror = reject;
                     reader.readAsDataURL(file);
                 });
             }
 
-            // データ保存
-            function saveTrades() {
-                try {
-                    localStorage.setItem('trades', JSON.stringify(trades));
-                } catch (e) {
-                    alert('容量がいっぱいです。古い画像を削除してください。');
-                }
-            }
+            function saveTrades() { try { localStorage.setItem('trades', JSON.stringify(trades)); } catch (e) { alert('容量オーバーです。古いデータを削除してください。'); } }
 
-            // リスト読み込み・描画
             function loadTrades() {
-                const targetTrades = currentTab === 'active' 
-                    ? trades.filter(t => t.status !== 'completed') 
-                    : trades.filter(t => t.status === 'completed');
+                const target = currentTab === 'active' ? trades.filter(t => t.status !== 'completed') : trades.filter(t => t.status === 'completed');
+                const container = document.getElementById(currentTab === 'active' ? 'active-trades' : 'completed-trades');
+                const other = document.getElementById(currentTab === 'active' ? 'completed-trades' : 'active-trades');
+                const empty = document.getElementById('empty-state');
                 
-                const activeContainer = document.getElementById('active-trades');
-                const completedContainer = document.getElementById('completed-trades');
-                const emptyState = document.getElementById('empty-state');
-                
-                const container = currentTab === 'active' ? activeContainer : completedContainer;
-                const other = currentTab === 'active' ? completedContainer : activeContainer;
+                other.classList.add('hidden'); container.classList.remove('hidden');
+                if (target.length === 0) { container.innerHTML = ''; empty.classList.remove('hidden'); } 
+                else { empty.classList.add('hidden'); container.innerHTML = target.map(t => createTradeCard(t)).join(''); }
 
-                other.classList.add('hidden');
-                container.classList.remove('hidden');
-
-                if (targetTrades.length === 0) {
-                    container.innerHTML = '';
-                    emptyState.classList.remove('hidden');
-                } else {
-                    emptyState.classList.add('hidden');
-                    container.innerHTML = targetTrades.map(t => createTradeCard(t)).join('');
-                }
-
-                // ボタンのイベント設定
-                attachCardEvents();
+                // イベント設定
+                document.querySelectorAll('.status-badge').forEach(el => el.onclick = () => updateStatus(el.dataset.id));
+                document.querySelectorAll('.btn-delete').forEach(el => el.onclick = () => deleteTrade(el.dataset.id));
+                document.querySelectorAll('.btn-generate').forEach(el => el.onclick = () => handleGenerateImage(el.dataset.id));
+                document.querySelectorAll('.btn-edit').forEach(el => el.onclick = () => openEditModal(el.dataset.id));
+                document.querySelectorAll('.btn-guide').forEach(el => el.onclick = () => openPackingModal(el.dataset.id));
             }
 
-            // カードHTML生成
             function createTradeCard(trade) {
                 const status = STATUSES.find(s => s.id === trade.status) || STATUSES[0];
-                const isCompleted = trade.status === 'completed';
-                
-                // 画像表示エリア
-                const imgHtml = trade.image 
-                    ? `<img src="${trade.image}" class="w-16 h-16 rounded-lg object-cover border border-gray-600">` 
-                    : `<div class="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-600"><i class="fas fa-image text-gray-600"></i></div>`;
+                const imgHtml = trade.image ? `<img src="${trade.image}" class="w-16 h-16 rounded-lg object-cover border border-gray-600">` : `<div class="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-600"><i class="fas fa-image text-gray-600"></i></div>`;
 
                 return `
-                    <div class="glass-card p-4 trade-card ${isCompleted ? 'completed' : ''}">
+                    <div class="glass-card p-4 trade-card ${trade.status === 'completed' ? 'completed' : ''}">
                         <div class="flex items-center gap-4">
                             ${imgHtml}
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${trade.tradeType === '譲渡' ? 'bg-pink-900 text-pink-300' : 'bg-cyan-900 text-cyan-300'}">
-                                        ${escapeHtml(trade.tradeType)}
-                                    </span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${trade.tradeType === '譲渡' ? 'bg-pink-900 text-pink-300' : 'bg-cyan-900 text-cyan-300'}">${escapeHtml(trade.tradeType)}</span>
                                     <h3 class="font-bold text-white truncate">${escapeHtml(trade.itemName)}</h3>
                                 </div>
-                                <div class="text-sm text-gray-400 truncate">
-                                    <i class="fas fa-user-circle mr-1"></i>${escapeHtml(trade.partnerName)}
-                                </div>
+                                <div class="text-sm text-gray-400 truncate mb-1"><i class="fas fa-user-circle mr-1"></i>${escapeHtml(trade.partnerName)}</div>
+                                <button class="btn-guide text-xs bg-gray-700 hover:bg-gray-600 text-cyan-300 px-2 py-1 rounded border border-gray-600 transition-colors" data-id="${trade.id}">
+                                    <i class="fas fa-box-open mr-1"></i>梱包ガイド
+                                </button>
                             </div>
                             <div class="flex flex-col items-end gap-2">
-                                <div class="status-badge ${status.class} text-xs" data-id="${trade.id}">
-                                    ${status.label} <i class="fas fa-chevron-right ml-1"></i>
-                                </div>
+                                <div class="status-badge ${status.class} text-xs" data-id="${trade.id}">${status.label} <i class="fas fa-chevron-right ml-1"></i></div>
                                 <div class="flex gap-2">
-                                    <button class="icon-btn btn-generate text-cyan-400" data-id="${trade.id}" title="画像生成">
-                                        <i class="fas fa-camera text-lg"></i>
-                                    </button>
-                                    <button class="icon-btn btn-delete text-gray-500 hover:text-pink-400" data-id="${trade.id}" title="削除">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <button class="icon-btn btn-generate text-cyan-400" data-id="${trade.id}" title="画像生成"><i class="fas fa-camera text-lg"></i></button>
+                                    <button class="icon-btn btn-edit text-gray-400 hover:text-white" data-id="${trade.id}" title="編集"><i class="fas fa-pen text-lg"></i></button>
+                                    <button class="icon-btn btn-delete text-gray-500 hover:text-pink-400" data-id="${trade.id}" title="削除"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>`;
             }
 
-            // イベント割り当て（動的要素用）
-            function attachCardEvents() {
-                document.querySelectorAll('.status-badge').forEach(el => {
-                    el.onclick = () => updateStatus(el.dataset.id);
-                });
-                document.querySelectorAll('.btn-delete').forEach(el => {
-                    el.onclick = () => deleteTrade(el.dataset.id);
-                });
-                document.querySelectorAll('.btn-generate').forEach(el => {
-                    el.onclick = () => handleGenerateImage(el.dataset.id);
-                });
+            function openEditModal(id) {
+                const trade = trades.find(t => t.id === id);
+                if (!trade) return;
+                document.getElementById('edit-id').value = trade.id;
+                document.getElementById('edit-partner-name').value = trade.partnerName;
+                document.getElementById('edit-item-name').value = trade.itemName;
+                document.getElementById('edit-trade-type').value = trade.tradeType;
+                document.getElementById('edit-memo').value = trade.memo || '';
+                document.getElementById('edit-delivery-method').value = trade.deliveryMethod || '';
+                document.getElementById('edit-tracking-number').value = trade.trackingNumber || '';
+                document.getElementById('edit-shipping-date').value = trade.shippingDate || '';
+                toggleModal('edit-modal', true);
             }
 
-            // ステータス更新
-            function updateStatus(id) {
+            // 梱包ガイドモーダル（2つのアフィリエイトボタン表示）
+            function openPackingModal(id) {
                 const trade = trades.find(t => t.id === id);
                 if (!trade) return;
                 
-                const currentIndex = STATUSES.findIndex(s => s.id === trade.status);
-                if (currentIndex < STATUSES.length - 1) {
-                    trade.status = STATUSES[currentIndex + 1].id;
-                    saveTrades();
-                    loadTrades();
+                const name = trade.itemName;
+                let content = '';
+
+                if (name.includes('缶バッジ') || name.includes('缶バ')) {
+                    content = `
+                        <div class="mb-4 text-center"><i class="fas fa-circle text-4xl text-pink-400 mb-2"></i><h3 class="text-lg font-bold">缶バッジの梱包</h3></div>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-300 mb-6 text-sm">
+                            <li>OPP袋に入れて封をする</li>
+                            <li>プチプチを<span class="text-pink-400 font-bold">2重</span>に巻く</li>
+                            <li>水濡れ防止袋に入れる</li>
+                        </ol>`;
+                } else if (name.includes('アクスタ') || name.includes('アクリル')) {
+                    content = `
+                        <div class="mb-4 text-center"><i class="fas fa-user text-4xl text-cyan-400 mb-2"></i><h3 class="text-lg font-bold">アクスタの梱包</h3></div>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-300 mb-6 text-sm">
+                            <li>台座と本体を別々にOPPに入れる</li>
+                            <li>プチプチを2重に巻く</li>
+                            <li>折れ防止の厚紙を添える</li>
+                        </ol>`;
+                } else if (name.includes('カード') || name.includes('紙') || name.includes('パシャ')) {
+                    content = `
+                        <div class="mb-4 text-center"><i class="fas fa-sticky-note text-4xl text-yellow-400 mb-2"></i><h3 class="text-lg font-bold">カード類の梱包</h3></div>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-300 mb-6 text-sm">
+                            <li>スリーブに入れる</li>
+                            <li>硬質ケース or 両面厚紙補強</li>
+                            <li>水濡れ防止のOPP袋に入れる</li>
+                        </ol>`;
+                } else {
+                    content = `
+                        <div class="mb-4 text-center"><i class="fas fa-gift text-4xl text-purple-400 mb-2"></i><h3 class="text-lg font-bold">基本の梱包</h3></div>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-300 mb-6 text-sm">
+                            <li>水濡れ防止袋に入れる</li>
+                            <li>壊れ物はプチプチで保護</li>
+                            <li>封筒に入れて封をする</li>
+                        </ol>`;
                 }
+
+                // 2つの楽天アフィリエイトボタン
+                content += `
+                    <div class="border-t border-gray-600 pt-4">
+                        <p class="text-xs text-center text-gray-400 mb-3">梱包材が足りないですか？</p>
+                        <div class="flex flex-col gap-3">
+                            <a href="${RAKUTEN_OPP_LINK}" target="_blank" class="btn-rakuten block w-full py-3 rounded-xl text-center no-underline">
+                                <i class="fas fa-shopping-bag mr-2"></i>OPP袋を買う (楽天)
+                            </a>
+                            <a href="${RAKUTEN_PUTI_LINK}" target="_blank" class="btn-rakuten block w-full py-3 rounded-xl text-center no-underline">
+                                <i class="fas fa-box-tissue mr-2"></i>プチプチを買う (楽天)
+                            </a>
+                        </div>
+                        <p class="text-[10px] text-center text-gray-500 mt-2">※クリックで楽天の商品ページへ移動します</p>
+                    </div>
+                `;
+
+                document.getElementById('packing-content').innerHTML = content;
+                toggleModal('packing-modal', true);
             }
 
-            // 削除
-            function deleteTrade(id) {
-                if (confirm('削除しますか？')) {
-                    trades = trades.filter(t => t.id !== id);
-                    saveTrades();
-                    loadTrades();
-                }
+            function toggleModal(id, show) {
+                const el = document.getElementById(id);
+                if (show) { el.classList.remove('hidden'); el.classList.add('flex'); }
+                else { el.classList.add('hidden'); el.classList.remove('flex'); }
             }
 
-            // タブ切り替え
-            function switchTab(tab) {
-                currentTab = tab;
-                document.getElementById('tab-active').classList.toggle('active', tab === 'active');
-                document.getElementById('tab-completed').classList.toggle('active', tab === 'completed');
-                document.getElementById('tab-active').classList.toggle('text-white', tab === 'active');
-                document.getElementById('tab-active').classList.toggle('text-gray-400', tab !== 'active');
-                document.getElementById('tab-completed').classList.toggle('text-white', tab === 'completed');
-                document.getElementById('tab-completed').classList.toggle('text-gray-400', tab !== 'completed');
-                loadTrades();
+            function updateStatus(id) {
+                const trade = trades.find(t => t.id === id); if(!trade) return;
+                const idx = STATUSES.findIndex(s => s.id === trade.status);
+                if (idx < STATUSES.length - 1) { trade.status = STATUSES[idx + 1].id; saveTrades(); loadTrades(); }
             }
-
-            // 画像生成処理
+            function deleteTrade(id) { if (confirm('削除しますか？')) { trades = trades.filter(t => t.id !== id); saveTrades(); loadTrades(); } }
             function handleGenerateImage(id) {
-                const trade = trades.find(t => t.id === id);
-                if (!trade) return;
-
+                const trade = trades.find(t => t.id === id); if(!trade) return;
                 const hiddenCard = createRecruitCardElement(trade);
                 document.body.appendChild(hiddenCard);
-
-                // html2canvas実行
-                html2canvas(hiddenCard.querySelector('.recruit-card'), {
-                    backgroundColor: null,
-                    scale: 2,
-                    useCORS: true
-                }).then(canvas => {
-                    const dataUrl = canvas.toDataURL('image/png');
-                    document.body.removeChild(hiddenCard);
-                    openImageModal(dataUrl);
-                }).catch(err => {
-                    console.error(err);
-                    document.body.removeChild(hiddenCard);
-                    alert("画像の生成に失敗しました。");
-                });
+                html2canvas(hiddenCard.querySelector('.recruit-card'), { backgroundColor: null, scale: 2, useCORS: true })
+                    .then(canvas => { document.body.removeChild(hiddenCard); openImageModal(canvas.toDataURL('image/png')); })
+                    .catch(() => { document.body.removeChild(hiddenCard); alert("生成エラー"); });
             }
-
-            // 募集カードDOM生成（非表示）
+            function openImageModal(dataUrl) {
+                const prev = document.getElementById('image-preview'), dl = document.getElementById('download-image');
+                prev.src = dataUrl;
+                dl.onclick = () => { const a = document.createElement('a'); a.href = dataUrl; a.download = `torihiki-${Date.now()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); };
+                toggleModal('image-modal', true);
+            }
+            // 募集カードDOM生成
             function createRecruitCardElement(trade) {
                 const wrapper = document.createElement('div');
-                wrapper.style.position = 'fixed';
-                wrapper.style.left = '-9999px';
-                wrapper.style.top = '-9999px';
-                wrapper.style.zIndex = '-1';
-
+                wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '-9999px'; wrapper.style.zIndex = '-1';
                 const createdDate = new Date(trade.createdAt).toLocaleDateString('ja-JP');
                 const memo = trade.memo ? escapeHtml(trade.memo) : '詳細はDMまで';
-                
-                // 画像がある場合とない場合のレイアウト
-                const imgSection = trade.image 
-                    ? `<img src="${trade.image}" class="recruit-card-image">` 
-                    : `<div class="recruit-card-image" style="display:flex;align-items:center;justify-content:center;color:#334155;"><i class="fas fa-camera text-6xl"></i></div>`;
-
-                wrapper.innerHTML = `
-                    <div class="recruit-card">
-                        ${imgSection}
-                        <div class="recruit-card-content">
-                            <div class="recruit-bg-pattern"></div>
-                            <div style="position:relative; z-index:2;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                    <h2 style="font-size:1.8rem; font-weight:800; color:#fff; margin:0;">TORIHIKI</h2>
-                                    <span class="pill">${escapeHtml(trade.tradeType)}</span>
-                                </div>
-                                <div style="margin-bottom:16px;">
-                                    <div class="label"><i class="fas fa-box"></i>ITEM NAME</div>
-                                    <div class="value">${escapeHtml(trade.itemName)}</div>
-                                </div>
-                                <div style="margin-bottom:24px;">
-                                    <div class="label"><i class="fas fa-comment-alt"></i>MEMO</div>
-                                    <div class="value" style="font-size:1rem; color:#cbd5e1; white-space:pre-wrap;">${memo}</div>
-                                </div>
-                                <div class="credit">
-                                    <div>${createdDate}</div>
-                                    <div style="font-weight:bold; color:#08d9d6;">Powered by Torihiki Note</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
+                const imgSection = trade.image ? `<img src="${trade.image}" class="recruit-card-image">` : `<div class="recruit-card-image" style="display:flex;align-items:center;justify-content:center;color:#334155;"><i class="fas fa-camera text-6xl"></i></div>`;
+                wrapper.innerHTML = `<div class="recruit-card">${imgSection}<div class="recruit-card-content"><div class="recruit-bg-pattern"></div><div style="position:relative; z-index:2;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><h2 style="font-size:1.8rem; font-weight:800; color:#fff; margin:0;">TORIHIKI</h2><span class="pill">${escapeHtml(trade.tradeType)}</span></div><div style="margin-bottom:16px;"><div class="label"><i class="fas fa-box"></i>ITEM NAME</div><div class="value">${escapeHtml(trade.itemName)}</div></div><div style="margin-bottom:24px;"><div class="label"><i class="fas fa-comment-alt"></i>MEMO</div><div class="value" style="font-size:1rem; color:#cbd5e1; white-space:pre-wrap;">${memo}</div></div><div class="credit"><div>${createdDate}</div><div style="font-weight:bold; color:#08d9d6;">Powered by Torihiki Note</div></div></div></div></div>`;
                 return wrapper;
             }
-
-            // モーダル表示
-            function openImageModal(dataUrl) {
-                const preview = document.getElementById('image-preview');
-                const modal = document.getElementById('image-modal');
-                const downloadBtn = document.getElementById('download-image');
-                
-                preview.src = dataUrl;
-                
-                // ダウンロードボタン設定
-                downloadBtn.onclick = () => {
-                    const link = document.createElement('a');
-                    link.href = dataUrl;
-                    link.download = `torihiki-card-${Date.now()}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                };
-                
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+            function switchTab(tab) {
+                currentTab = tab;
+                document.getElementById('tab-active').classList.toggle('active', tab==='active'); document.getElementById('tab-completed').classList.toggle('active', tab==='completed');
+                document.getElementById('tab-active').classList.toggle('text-white', tab==='active'); document.getElementById('tab-active').classList.toggle('text-gray-400', tab!=='active');
+                document.getElementById('tab-completed').classList.toggle('text-white', tab==='completed'); document.getElementById('tab-completed').classList.toggle('text-gray-400', tab!=='completed');
+                loadTrades();
             }
-
-            function closeImageModal() {
-                const modal = document.getElementById('image-modal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-
-            // エスケープ処理
-            function escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
+            function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         });
     </script>
 </body>
