@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torihiki Note - グッズ交換・譲渡管理ツール</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 基本設定 */
+        * { font-family: 'M PLUS Rounded 1c', sans-serif; }
+        body { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); 
+            min-height: 100vh; 
+            padding: 2rem; 
+            color: #fff; 
+        }
+
+        /* ガラスモーフィズム */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
+        }
+
+        /* ネオンカラー */
+        .neon-pink { color: #ff2e63; text-shadow: 0 0 10px #ff2e63; }
+        .neon-cyan { color: #08d9d6; text-shadow: 0 0 10px #08d9d6; }
+        
+        .btn-neon-pink { 
+            background: linear-gradient(135deg, #ff2e63 0%, #ff1744 100%); 
+            box-shadow: 0 0 20px rgba(255, 46, 99, 0.5); 
+            transition: all 0.3s ease; 
+        }
+        .btn-neon-cyan { 
+            background: linear-gradient(135deg, #08d9d6 0%, #00bcd4 100%); 
+            box-shadow: 0 0 20px rgba(8, 217, 214, 0.5); 
+            transition: all 0.3s ease; 
+        }
+
+        /* 入力フォームの文字色対策（強力版） */
+        input, select, textarea { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: #fff !important; 
+            border-radius: 12px; 
+            padding: 0.75rem; 
+            transition: all 0.3s ease; 
+        }
+        /* オートフィル（自動入力）対策 */
+        input:-webkit-autofill, 
+        textarea:-webkit-autofill, 
+        select:-webkit-autofill { 
+            -webkit-box-shadow: 0 0 0px 1000px #1a1a2e inset !important; 
+            -webkit-text-fill-color: #fff !important; 
+            color: #fff !important; 
+            caret-color: #fff; 
+        }
+
+        /* ステータスバッジ */
+        .status-badge { cursor: pointer; transition: all 0.3s ease; border-radius: 12px; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 700; }
+        .status-badge:hover { transform: scale(1.05); }
+        .status-dm { background: rgba(255, 46, 99, 0.2); color: #ff2e63; }
+        .status-address { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .status-shipping-wait { background: rgba(255, 152, 0, 0.2); color: #ff9800; }
+        .status-shipped { background: rgba(33, 150, 243, 0.2); color: #2196f3; }
+        .status-received { background: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .status-completed { background: rgba(156, 39, 176, 0.2); color: #9c27b0; }
+        
+        /* アニメーション */
+        .trade-card { transition: all 0.3s ease; animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .glitch::before { left: 2px; text-shadow: -2px 0 #ff2e63; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+        .glitch::after { left: -2px; text-shadow: -2px 0 #08d9d6; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 1s infinite linear alternate-reverse; }
+        @keyframes glitch-anim { 0% { clip: rect(42px, 9999px, 44px, 0); } 5% { clip: rect(12px, 9999px, 59px, 0); } 50% { clip: rect(57px, 9999px, 98px, 0); } 100% { clip: rect(78px, 9999px, 54px, 0); } }
+
+        /* ファイルアップロード */
+        .file-upload { position: relative; display: inline-block; width: 100%; }
+        .file-upload input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+        .file-upload-label { display: flex; align-items: center; justify-content: center; padding: 0.75rem; border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; color: rgba(255,255,255,0.6); transition: all 0.3s; }
+        .file-upload:hover .file-upload-label { border-color: #08d9d6; color: #08d9d6; background: rgba(8, 217, 214, 0.05); }
+
+        .tab-button.active { background: rgba(255, 46, 99, 0.2); color: #ff2e63; box-shadow: 0 0 15px rgba(255, 46, 99, 0.3); }
+        .icon-btn { transition: all 0.3s ease; border-radius: 10px; padding: 0.5rem; }
+        .icon-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.1); }
+
+        /* 募集画像カード（写真対応版） */
+        .recruit-card { 
+            width: 800px; 
+            padding: 0; 
+            background: #1a1a2e; 
+            border-radius: 28px; 
+            overflow: hidden; 
+            box-shadow: 0 0 40px rgba(0,0,0,0.5); 
+            position: relative; 
+            display: flex; 
+        }
+        .recruit-card-image { 
+            width: 350px; 
+            height: 450px; 
+            object-fit: cover; 
+            background: #0f172a; 
+            border-right: 2px solid rgba(8, 217, 214, 0.3); 
+        }
+        .recruit-card-content { 
+            flex: 1; 
+            padding: 32px; 
+            position: relative; 
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.98), rgba(15, 52, 96, 0.98)); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+        .recruit-card .pill { background: linear-gradient(135deg, #08d9d6 0%, #00bcd4 100%); color: #0f172a; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; }
+        .recruit-card .label { color: #08d9d6; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .recruit-card .value { font-size: 1.25rem; font-weight: bold; line-height: 1.4; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .recruit-card .credit { margin-top: auto; font-size: 0.8rem; color: #ff9ecd; text-align: right; opacity: 0.8; }
+        .recruit-bg-pattern { position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(#08d9d6 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-5xl font-bold neon-pink mb-2 glitch" data-text="Torihiki Note">Torihiki Note</h1>
+            <p class="text-xl text-gray-300">グッズ交換・譲渡管理ツール</p>
+        </header>
+        
+        <div class="flex gap-4 mb-6 justify-center">
+            <button id="tab-active" class="tab-button active text-white"><i class="fas fa-list mr-2"></i>進行中</button>
+            <button id="tab-completed" class="tab-button text-gray-400"><i class="fas fa-check-circle mr-2"></i>完了済み</button>
+        </div>
+        
+        <div id="form-container" class="glass-card p-6 mb-8">
+            <h2 class="text-2xl font-bold neon-cyan mb-4"><i class="fas fa-plus-circle mr-2"></i>新しい取引を追加</h2>
+            <form id="trade-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-300 mb-2">相手の名前</label>
+                        <input type="text" id="partner-name" placeholder="例: 田中さん" required class="w-full">
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 mb-2">取引アイテム名</label>
+                        <input type="text" id="item-name" placeholder="例: 限定缶バッジ" required class="w-full">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-2">取引の種類</label>
+                    <select id="trade-type" required class="w-full">
+                        <option value="">選択してください</option>
+                        <option value="譲渡">譲渡</option>
+                        <option value="交換">交換</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-2">商品写真 (任意)</label>
+                    <div class="file-upload">
+                        <input type="file" id="item-image" accept="image/*">
+                        <div class="file-upload-label" id="file-label">
+                            <i class="fas fa-camera mr-2"></i>写真を撮る / 選択する
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-2">メモ</label>
+                    <textarea id="memo" rows="3" placeholder="条件など..." class="w-full"></textarea>
+                </div>
+                <button type="submit" class="btn-neon-pink text-white font-bold py-3 px-6 rounded-xl w-full">
+                    <i class="fas fa-magic mr-2"></i>追加する
+                </button>
+            </form>
+        </div>
+        
+        <div id="trades-container" class="space-y-4">
+            <div id="active-trades" class="space-y-4"></div>
+            <div id="completed-trades" class="space-y-4 hidden"></div>
+        </div>
+        
+        <div id="empty-state" class="text-center py-12 glass-card hidden">
+            <i class="fas fa-inbox text-6xl text-gray-500 mb-4"></i>
+            <p class="text-xl text-gray-400">取引がありません</p>
+        </div>
+    </div>
+    
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-card p-6 max-w-3xl w-full mx-4 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold neon-cyan"><i class="fas fa-camera mr-2"></i>募集カード生成</h2>
+                <button id="close-image-modal" class="icon-btn text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="bg-gray-900 rounded-xl p-2 border border-gray-700 overflow-hidden">
+                <img id="image-preview" alt="プレビュー" class="w-full rounded-lg">
+            </div>
+            <button id="download-image" class="btn-neon-cyan text-white font-bold py-3 px-6 rounded-xl w-full">
+                <i class="fas fa-download mr-2"></i>画像を保存
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ステータス定義
+            const STATUSES = [
+                { id: 'dm', label: 'DM中', class: 'status-dm' },
+                { id: 'address', label: '住所交換', class: 'status-address' },
+                { id: 'shipping-wait', label: '発送待', class: 'status-shipping-wait' },
+                { id: 'shipped', label: '発送済', class: 'status-shipped' },
+                { id: 'received', label: '受取済', class: 'status-received' },
+                { id: 'completed', label: '完了', class: 'status-completed' }
+            ];
+
+            // データ読み込み
+            let trades = [];
+            try {
+                trades = JSON.parse(localStorage.getItem('trades') || '[]');
+            } catch (e) {
+                console.error("データ読み込みエラー", e);
+                trades = [];
+            }
+            
+            let currentTab = 'active';
+
+            // 初期化
+            init();
+
+            function init() {
+                loadTrades();
+                setupEventListeners();
+                console.log("App Initialized");
+            }
+
+            function setupEventListeners() {
+                // 取引追加フォーム
+                const form = document.getElementById('trade-form');
+                if (form) {
+                    form.addEventListener('submit', handleAddTrade);
+                }
+
+                // ファイル選択時の表示変更
+                const fileInput = document.getElementById('item-image');
+                if (fileInput) {
+                    fileInput.addEventListener('change', (e) => {
+                        const fileName = e.target.files[0]?.name;
+                        const label = document.getElementById('file-label');
+                        if (label) {
+                            label.innerHTML = fileName 
+                                ? `<i class="fas fa-check mr-2"></i>${escapeHtml(fileName)}` 
+                                : '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
+                        }
+                    });
+                }
+
+                // タブ切り替え
+                document.getElementById('tab-active').addEventListener('click', () => switchTab('active'));
+                document.getElementById('tab-completed').addEventListener('click', () => switchTab('completed'));
+
+                // 画像モーダル
+                document.getElementById('close-image-modal').addEventListener('click', closeImageModal);
+                document.getElementById('image-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'image-modal') closeImageModal();
+                });
+            }
+
+            // 取引追加処理
+            async function handleAddTrade(e) {
+                e.preventDefault(); // リロード防止
+                
+                try {
+                    const fileInput = document.getElementById('item-image');
+                    let imageData = null;
+                    
+                    // 画像があれば圧縮
+                    if (fileInput.files && fileInput.files[0]) {
+                        imageData = await compressImage(fileInput.files[0]);
+                    }
+
+                    const trade = {
+                        id: Date.now().toString(),
+                        partnerName: document.getElementById('partner-name').value,
+                        itemName: document.getElementById('item-name').value,
+                        tradeType: document.getElementById('trade-type').value,
+                        memo: document.getElementById('memo').value,
+                        status: 'dm',
+                        image: imageData,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    trades.push(trade);
+                    saveTrades();
+                    loadTrades();
+                    
+                    // フォームリセット
+                    e.target.reset();
+                    document.getElementById('file-label').innerHTML = '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
+                    
+                } catch (error) {
+                    console.error("追加エラー:", error);
+                    alert("追加に失敗しました。");
+                }
+            }
+
+            // 画像圧縮関数
+            function compressImage(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_SIZE = 800; // 最大サイズ制限
+
+                            if (width > height) {
+                                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                            } else {
+                                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.7));
+                        };
+                        img.onerror = reject;
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // データ保存
+            function saveTrades() {
+                try {
+                    localStorage.setItem('trades', JSON.stringify(trades));
+                } catch (e) {
+                    alert('容量がいっぱいです。古い画像を削除してください。');
+                }
+            }
+
+            // リスト読み込み・描画
+            function loadTrades() {
+                const targetTrades = currentTab === 'active' 
+                    ? trades.filter(t => t.status !== 'completed') 
+                    : trades.filter(t => t.status === 'completed');
+                
+                const activeContainer = document.getElementById('active-trades');
+                const completedContainer = document.getElementById('completed-trades');
+                const emptyState = document.getElementById('empty-state');
+                
+                const container = currentTab === 'active' ? activeContainer : completedContainer;
+                const other = currentTab === 'active' ? completedContainer : activeContainer;
+
+                other.classList.add('hidden');
+                container.classList.remove('hidden');
+
+                if (targetTrades.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    container.innerHTML = targetTrades.map(t => createTradeCard(t)).join('');
+                }
+
+                // ボタンのイベント設定
+                attachCardEvents();
+            }
+
+            // カードHTML生成
+            function createTradeCard(trade) {
+                const status = STATUSES.find(s => s.id === trade.status) || STATUSES[0];
+                const isCompleted = trade.status === 'completed';
+                
+                // 画像表示エリア
+                const imgHtml = trade.image 
+                    ? `<img src="${trade.image}" class="w-16 h-16 rounded-lg object-cover border border-gray-600">` 
+                    : `<div class="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-600"><i class="fas fa-image text-gray-600"></i></div>`;
+
+                return `
+                    <div class="glass-card p-4 trade-card ${isCompleted ? 'completed' : ''}">
+                        <div class="flex items-center gap-4">
+                            ${imgHtml}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${trade.tradeType === '譲渡' ? 'bg-pink-900 text-pink-300' : 'bg-cyan-900 text-cyan-300'}">
+                                        ${escapeHtml(trade.tradeType)}
+                                    </span>
+                                    <h3 class="font-bold text-white truncate">${escapeHtml(trade.itemName)}</h3>
+                                </div>
+                                <div class="text-sm text-gray-400 truncate">
+                                    <i class="fas fa-user-circle mr-1"></i>${escapeHtml(trade.partnerName)}
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                <div class="status-badge ${status.class} text-xs" data-id="${trade.id}">
+                                    ${status.label} <i class="fas fa-chevron-right ml-1"></i>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="icon-btn btn-generate text-cyan-400" data-id="${trade.id}" title="画像生成">
+                                        <i class="fas fa-camera text-lg"></i>
+                                    </button>
+                                    <button class="icon-btn btn-delete text-gray-500 hover:text-pink-400" data-id="${trade.id}" title="削除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            // イベント割り当て（動的要素用）
+            function attachCardEvents() {
+                document.querySelectorAll('.status-badge').forEach(el => {
+                    el.onclick = () => updateStatus(el.dataset.id);
+                });
+                document.querySelectorAll('.btn-delete').forEach(el => {
+                    el.onclick = () => deleteTrade(el.dataset.id);
+                });
+                document.querySelectorAll('.btn-generate').forEach(el => {
+                    el.onclick = () => handleGenerateImage(el.dataset.id);
+                });
+            }
+
+            // ステータス更新
+            function updateStatus(id) {
+                const trade = trades.find(t => t.id === id);
+                if (!trade) return;
+                
+                const currentIndex = STATUSES.findIndex(s => s.id === trade.status);
+                if (currentIndex < STATUSES.length - 1) {
+                    trade.status = STATUSES[currentIndex + 1].id;
+                    saveTrades();
+                    loadTrades();
+                }
+            }
+
+            // 削除
+            function deleteTrade(id) {
+                if (confirm('削除しますか？')) {
+                    trades = trades.filter(t => t.id !== id);
+                    saveTrades();
+                    loadTrades();
+                }
+            }
+
+            // タブ切り替え
+            function switchTab(tab) {
+                currentTab = tab;
+                document.getElementById('tab-active').classList.toggle('active', tab === 'active');
+                document.getElementById('tab-completed').classList.toggle('active', tab === 'completed');
+                document.getElementById('tab-active').classList.toggle('text-white', tab === 'active');
+                document.getElementById('tab-active').classList.toggle('text-gray-400', tab !== 'active');
+                document.getElementById('tab-completed').classList.toggle('text-white', tab === 'completed');
+                document.getElementById('tab-completed').classList.toggle('text-gray-400', tab !== 'completed');
+                loadTrades();
+            }
+
+            // 画像生成処理
+            function handleGenerateImage(id) {
+                const trade = trades.find(t => t.id === id);
+                if (!trade) return;
+
+                const hiddenCard = createRecruitCardElement(trade);
+                document.body.appendChild(hiddenCard);
+
+                // html2canvas実行
+                html2canvas(hiddenCard.querySelector('.recruit-card'), {
+                    backgroundColor: null,
+                    scale: 2,
+                    useCORS: true
+                }).then(canvas => {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    document.body.removeChild(hiddenCard);
+                    openImageModal(dataUrl);
+                }).catch(err => {
+                    console.error(err);
+                    document.body.removeChild(hiddenCard);
+                    alert("画像の生成に失敗しました。");
+                });
+            }
+
+            // 募集カードDOM生成（非表示）
+            function createRecruitCardElement(trade) {
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'fixed';
+                wrapper.style.left = '-9999px';
+                wrapper.style.top = '-9999px';
+                wrapper.style.zIndex = '-1';
+
+                const createdDate = new Date(trade.createdAt).toLocaleDateString('ja-JP');
+                const memo = trade.memo ? escapeHtml(trade.memo) : '詳細はDMまで';
+                
+                // 画像がある場合とない場合のレイアウト
+                const imgSection = trade.image 
+                    ? `<img src="${trade.image}" class="recruit-card-image">` 
+                    : `<div class="recruit-card-image" style="display:flex;align-items:center;justify-content:center;color:#334155;"><i class="fas fa-camera text-6xl"></i></div>`;
+
+                wrapper.innerHTML = `
+                    <div class="recruit-card">
+                        ${imgSection}
+                        <div class="recruit-card-content">
+                            <div class="recruit-bg-pattern"></div>
+                            <div style="position:relative; z-index:2;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <h2 style="font-size:1.8rem; font-weight:800; color:#fff; margin:0;">TORIHIKI</h2>
+                                    <span class="pill">${escapeHtml(trade.tradeType)}</span>
+                                </div>
+                                <div style="margin-bottom:16px;">
+                                    <div class="label"><i class="fas fa-box"></i>ITEM NAME</div>
+                                    <div class="value">${escapeHtml(trade.itemName)}</div>
+                                </div>
+                                <div style="margin-bottom:24px;">
+                                    <div class="label"><i class="fas fa-comment-alt"></i>MEMO</div>
+                                    <div class="value" style="font-size:1rem; color:#cbd5e1; white-space:pre-wrap;">${memo}</div>
+                                </div>
+                                <div class="credit">
+                                    <div>${createdDate}</div>
+                                    <div style="font-weight:bold; color:#08d9d6;">Powered by Torihiki Note</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                return wrapper;
+            }
+
+            // モーダル表示
+            function openImageModal(dataUrl) {
+                const preview = document.getElementById('image-preview');
+                const modal = document.getElementById('image-modal');
+                const downloadBtn = document.getElementById('download-image');
+                
+                preview.src = dataUrl;
+                
+                // ダウンロードボタン設定
+                downloadBtn.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = `torihiki-card-${Date.now()}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeImageModal() {
+                const modal = document.getElementById('image-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            // エスケープ処理
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        });
+    </script>
+</body>
+</html>
