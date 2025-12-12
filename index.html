@@ -104,11 +104,12 @@
                 <div><label class="block text-gray-300 mb-2">取引の種類</label>
                     <select id="trade-type" required class="w-full"><option value="">選択してください</option><option value="譲渡">譲渡</option><option value="交換">交換</option></select>
                 </div>
-                <div><label class="block text-gray-300 mb-2">商品写真 (任意)</label>
-                    <div class="file-upload"><input type="file" id="item-image" accept="image/*"><div class="file-upload-label" id="file-label"><i class="fas fa-camera mr-2"></i>写真を撮る / 選択する</div></div>
+                <div><label class="block text-gray-300 mb-2">商品写真 (任意・最大4枚)</label>
+                    <div class="file-upload"><input type="file" id="item-image" accept="image/*"><div class="file-upload-label" id="file-label"><i class="fas fa-camera mr-2"></i>写真を追加 (最大4枚)</div></div>
+                    <div id="image-preview-container" class="mt-3 grid grid-cols-2 gap-2"></div>
                 </div>
                 <div><label class="block text-gray-300 mb-2">メモ</label><textarea id="memo" rows="3" placeholder="条件など..." class="w-full"></textarea></div>
-                <button type="submit" class="btn-neon-pink text-white font-bold py-3 px-6 rounded-xl w-full"><i class="fas fa-magic mr-2"></i>追加する</button>
+                <button type="submit" class="btn-neon-pink text-white font-bold py-3 px-6 rounded-xl w-full"><i class="fas fa-magic mr-2"></i>リストに追加する</button>
             </form>
         </div>
         
@@ -175,17 +176,64 @@
             let trades = [];
             try { trades = JSON.parse(localStorage.getItem('trades') || '[]'); } catch (e) { trades = []; }
             let currentTab = 'active';
+            let selectedImages = []; // 選択中の画像を保持
 
             init();
 
             function init() { loadTrades(); setupEventListeners(); }
 
+            function updateImagePreview() {
+                const previewContainer = document.getElementById('image-preview-container');
+                if (!previewContainer) return;
+                previewContainer.innerHTML = '';
+                
+                selectedImages.forEach((imageData, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'relative';
+                    const img = document.createElement('img');
+                    img.src = imageData;
+                    img.className = 'w-full h-24 object-cover rounded-lg border border-gray-600';
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.onclick = () => {
+                        selectedImages.splice(index, 1);
+                        updateImagePreview();
+                    };
+                    div.appendChild(img);
+                    div.appendChild(removeBtn);
+                    previewContainer.appendChild(div);
+                });
+                
+                const fileLabel = document.getElementById('file-label');
+                if (fileLabel) {
+                    fileLabel.innerHTML = selectedImages.length > 0 
+                        ? `<i class="fas fa-check mr-2"></i>${selectedImages.length}/4枚追加済み`
+                        : '<i class="fas fa-camera mr-2"></i>写真を追加 (最大4枚)';
+                }
+            }
+
             function setupEventListeners() {
                 const form = document.getElementById('trade-form');
                 if (form) form.addEventListener('submit', handleAddTrade);
-                document.getElementById('item-image').addEventListener('change', (e) => {
-                    const fileName = e.target.files[0]?.name;
-                    document.getElementById('file-label').innerHTML = fileName ? `<i class="fas fa-check mr-2"></i>${escapeHtml(fileName)}` : '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
+                document.getElementById('item-image').addEventListener('change', async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    if (selectedImages.length >= 4) {
+                        alert('画像は最大4枚まで追加できます');
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const imageData = event.target.result;
+                        selectedImages.push(imageData);
+                        updateImagePreview();
+                        e.target.value = ''; // 同じファイルを再度選択できるようにリセット
+                    };
+                    reader.readAsDataURL(file);
                 });
                 document.getElementById('tab-active').addEventListener('click', () => switchTab('active'));
                 document.getElementById('tab-completed').addEventListener('click', () => switchTab('completed'));
@@ -205,9 +253,16 @@
             async function handleAddTrade(e) {
                 e.preventDefault();
                 try {
-                    const fileInput = document.getElementById('item-image');
-                    let imageData = null;
-                    if (fileInput.files && fileInput.files[0]) imageData = await compressImage(fileInput.files[0]);
+                    let imagesData = [];
+                    // 選択済み画像を圧縮
+                    for (const imageData of selectedImages) {
+                        // DataURLからBlobに変換して圧縮
+                        const response = await fetch(imageData);
+                        const blob = await response.blob();
+                        const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+                        const compressed = await compressImage(file);
+                        imagesData.push(compressed);
+                    }
 
                     const trade = {
                         id: Date.now().toString(),
@@ -217,13 +272,19 @@
                         memo: document.getElementById('memo').value,
                         deliveryMethod: '', trackingNumber: '', shippingDate: '', 
                         status: 'dm',
-                        image: imageData,
+                        images: imagesData,
+                        image: imagesData[0] || null, // 後方互換性のため
                         createdAt: new Date().toISOString()
                     };
                     trades.push(trade);
-                    saveTrades(); loadTrades(); e.target.reset();
-                    document.getElementById('file-label').innerHTML = '<i class="fas fa-camera mr-2"></i>写真を撮る / 選択する';
-                } catch (error) { alert("追加エラー"); }
+                    saveTrades(); loadTrades(); 
+                    e.target.reset();
+                    selectedImages = []; // 選択済み画像をクリア
+                    updateImagePreview();
+                } catch (error) { 
+                    console.error(error);
+                    alert("追加エラー"); 
+                }
             }
 
             // 編集保存処理
@@ -287,12 +348,23 @@
 
             function createTradeCard(trade) {
                 const status = STATUSES.find(s => s.id === trade.status) || STATUSES[0];
-                const imgHtml = trade.image ? `<img src="${trade.image}" class="w-16 h-16 rounded-lg object-cover border border-gray-600">` : `<div class="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-600"><i class="fas fa-image text-gray-600"></i></div>`;
+                const images = trade.images || (trade.image ? [trade.image] : []);
+                let imgHtml = '';
+                if (images.length === 0) {
+                    imgHtml = `<div class="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center border border-gray-600"><i class="fas fa-image text-gray-600"></i></div>`;
+                } else if (images.length === 1) {
+                    imgHtml = `<img src="${images[0]}" class="w-16 h-16 rounded-lg object-cover border border-gray-600">`;
+                } else {
+                    imgHtml = `<div class="w-16 h-16 grid grid-cols-2 gap-0.5 rounded-lg overflow-hidden border border-gray-600 relative">
+                        ${images.slice(0, 4).map((img, idx) => `<img src="${img}" class="w-full h-full object-cover ${idx === 3 && images.length > 4 ? 'opacity-50' : ''}">`).join('')}
+                        ${images.length > 4 ? `<div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 text-white text-xs font-bold rounded-lg">+${images.length - 4}</div>` : ''}
+                    </div>`;
+                }
 
                 return `
                     <div class="glass-card p-4 trade-card ${trade.status === 'completed' ? 'completed' : ''}">
                         <div class="flex items-center gap-4">
-                            ${imgHtml}
+                            <div class="relative">${imgHtml}</div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="px-2 py-0.5 rounded-full text-xs font-bold ${trade.tradeType === '譲渡' ? 'bg-pink-900 text-pink-300' : 'bg-cyan-900 text-cyan-300'}">${escapeHtml(trade.tradeType)}</span>
@@ -423,7 +495,17 @@
                 wrapper.style.position = 'fixed'; wrapper.style.left = '-9999px'; wrapper.style.top = '-9999px'; wrapper.style.zIndex = '-1';
                 const createdDate = new Date(trade.createdAt).toLocaleDateString('ja-JP');
                 const memo = trade.memo ? escapeHtml(trade.memo) : '詳細はDMまで';
-                const imgSection = trade.image ? `<img src="${trade.image}" class="recruit-card-image">` : `<div class="recruit-card-image" style="display:flex;align-items:center;justify-content:center;color:#334155;"><i class="fas fa-camera text-6xl"></i></div>`;
+                const images = trade.images || (trade.image ? [trade.image] : []);
+                let imgSection = '';
+                if (images.length === 0) {
+                    imgSection = `<div class="recruit-card-image" style="display:flex;align-items:center;justify-content:center;color:#334155;"><i class="fas fa-camera text-6xl"></i></div>`;
+                } else if (images.length === 1) {
+                    imgSection = `<img src="${images[0]}" class="recruit-card-image">`;
+                } else {
+                    imgSection = `<div class="recruit-card-image" style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:#0f172a;">
+                        ${images.slice(0, 4).map(img => `<img src="${img}" style="width:100%;height:100%;object-fit:cover;">`).join('')}
+                    </div>`;
+                }
                 wrapper.innerHTML = `<div class="recruit-card">${imgSection}<div class="recruit-card-content"><div class="recruit-bg-pattern"></div><div style="position:relative; z-index:2;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><h2 style="font-size:1.8rem; font-weight:800; color:#fff; margin:0;">TORIHIKI</h2><span class="pill">${escapeHtml(trade.tradeType)}</span></div><div style="margin-bottom:16px;"><div class="label"><i class="fas fa-box"></i>ITEM NAME</div><div class="value">${escapeHtml(trade.itemName)}</div></div><div style="margin-bottom:24px;"><div class="label"><i class="fas fa-comment-alt"></i>MEMO</div><div class="value" style="font-size:1rem; color:#cbd5e1; white-space:pre-wrap;">${memo}</div></div><div class="credit"><div>${createdDate}</div><div style="font-weight:bold; color:#08d9d6;">Powered by Torihiki Note</div></div></div></div></div>`;
                 return wrapper;
             }
