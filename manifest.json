@@ -1,0 +1,28 @@
+{
+  "name": "Torihiki Note - グッズ交換・譲渡管理ツール",
+  "short_name": "Torihiki Note",
+  "description": "グッズ交換・譲渡を管理するためのPWAアプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#ff2e63",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "ja",
+  "dir": "ltr"
+}
+
